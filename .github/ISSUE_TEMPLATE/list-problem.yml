@@ -1,0 +1,47 @@
+name: Report a list problem
+description: Report an inaccurate, unavailable, unmaintained, or unsafe listing.
+title: "[List problem]: "
+body:
+  - type: checkboxes
+    id: existing
+    attributes:
+      label: Existing reports
+      description: Search open and closed issues before filing a new report.
+      options:
+        - label: I searched for an existing report.
+          required: true
+  - type: input
+    id: entry
+    attributes:
+      label: Plugin or resource
+      description: Name and URL of the affected entry.
+      placeholder: agent-monitor - https://github.com/owner/repository
+    validations:
+      required: true
+  - type: dropdown
+    id: problem
+    attributes:
+      label: Problem
+      options:
+        - Broken or redirected link
+        - Archived or unmaintained project
+        - Inaccurate description or compatibility
+        - Security or trust concern
+        - Duplicate or incorrect category
+        - Other list problem
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Explain the problem and include links or reproduction steps.
+    validations:
+      required: true
+  - type: textarea
+    id: correction
+    attributes:
+      label: Proposed correction
+      description: Describe the list change you recommend.
+    validations:
+      required: false

@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "lint": {
+      "command": "npx --yes awesome-lint@2.3.0"
+    }
+  }
+}

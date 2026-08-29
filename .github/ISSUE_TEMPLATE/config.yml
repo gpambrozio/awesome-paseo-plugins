@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Submit a plugin
+    url: https://github.com/omercnet/awesome-paseo-plugins/blob/main/CONTRIBUTING.md
+    about: Read the contribution guidelines and submit the plugin through a pull request.
+  - name: Report a Paseo product problem
+    url: https://github.com/getpaseo/paseo/issues
+    about: Report problems with Paseo itself in the Paseo repository.
+  - name: Ask the community
+    url: https://discord.gg/jz8T2uahpH
+    about: Ask for plugin support or discuss plugin ideas in the Paseo Discord.

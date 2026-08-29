@@ -17,7 +17,6 @@ Paseo plugins add native workspace panels, composer pills, Command Center items,
 - [Composer and attachments](#composer-and-attachments)
 - [Resources](#resources)
 - [Installing plugins](#installing-plugins)
-- [Contributing](#contributing)
 
 ## Monitoring and orchestration
 
@@ -27,33 +26,33 @@ Paseo plugins add native workspace panels, composer pills, Command Center items,
 
 *Plugins that add panels to workspace tabs or the explorer.*
 
-- *Your plugin here.*
+<!-- Add workspace panel plugins here. -->
 
 ## Themes
 
 *App themes contributed through the plugin API.*
 
-- *Your plugin here.*
+<!-- Add theme plugins here. -->
 
 ## Daemon and automation
 
 *Plugins that add daemon-side behavior: schedulers, webhooks, notifications, integrations.*
 
-- *Your plugin here.*
+<!-- Add daemon and automation plugins here. -->
 
 ## Composer and attachments
 
 *Composer pills and attachment sources.*
 
-- *Your plugin here.*
+<!-- Add composer and attachment plugins here. -->
 
 ## Resources
 
-- [Plugin quickstart](https://paseo.sh/docs/plugins) - scaffold, install, reload, and debug a plugin.
-- [Plugin reference](https://paseo.sh/docs/plugins/reference) - contribution surfaces, theme and layout tokens, lifecycle.
-- [TypeScript SDK](https://paseo.sh/docs/sdk) - the workspace, agent, provider, and config API exposed inside plugins.
-- [Plugin roadmap](https://github.com/getpaseo/paseo/labels/plugins) - planned contribution surfaces and their status.
-- [Paseo Discord](https://discord.gg/jz8T2uahpH) - ask questions, share what you built.
+- [Plugin quickstart](https://paseo.sh/docs/plugins) - Scaffold, install, reload, and debug a plugin.
+- [Plugin reference](https://paseo.sh/docs/plugins/reference) - Contribution surfaces, theme and layout tokens, lifecycle.
+- [TypeScript SDK](https://paseo.sh/docs/sdk) - The workspace, agent, provider, and config API exposed inside plugins.
+- [Plugin roadmap](https://github.com/getpaseo/paseo/labels/plugins) - Planned contribution surfaces and their status.
+- [Paseo Discord](https://discord.gg/jz8T2uahpH) - Ask questions and share what you built.
 
 ## Installing plugins
 
@@ -77,14 +76,4 @@ Git installation runs no package manager or install scripts, so plugins must use
 
 ## Contributing
 
-PRs welcome. To add a plugin:
-
-1. It must be installable with `paseo plugin add` (public Git repo, no install scripts required).
-2. Add it to the right section, alphabetically, as: `[name](repo-url) - one-sentence description.` Note platform limits (e.g. web/desktop only) and minimum daemon version if relevant.
-3. The repo should have a README covering what it does, how it reads state, and known limits.
-
-One plugin per PR. Keep descriptions factual - what it does, not how awesome it is.
-
-## License
-
-[CC0](LICENSE) - public domain. Do whatever you want with this list.
+Pull requests are welcome. Read the [contribution guidelines](CONTRIBUTING.md) before submitting a plugin.
