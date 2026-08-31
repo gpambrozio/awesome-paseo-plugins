@@ -33,7 +33,7 @@ function parseArgs(argv) {
   return {
     targetsPath: value("--targets"),
     outputPath: value("--output"),
-    model: value("--model", "google/gemini-3.6-flash"),
+    model: value("--model", "google/gemini-3.1-flash-lite"),
     configDir: value("--config-dir"),
     opencodePath: value("--opencode", "opencode"),
     dryRun: argv.includes("--dry-run"),
