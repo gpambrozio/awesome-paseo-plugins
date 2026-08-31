@@ -14,6 +14,7 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve, sep } from "node:path";
+import { pathToFileURL } from "node:url";
 import process from "node:process";
 
 const MAX_REPOSITORY_BYTES = 20 * 1024 * 1024;
@@ -215,6 +216,23 @@ async function cloneRepository(target, destination) {
   });
 }
 
+export function buildOpenCodeEnvironment(environment, configDir) {
+  return {
+    ...environment,
+    CI: "true",
+    NO_COLOR: "1",
+    GOOGLE_GENERATIVE_AI_API_KEY:
+      environment.GOOGLE_GENERATIVE_AI_API_KEY ?? environment.GEMINI_API_KEY,
+    OPENCODE_CONFIG_DIR: resolve(configDir),
+    OPENCODE_CONFIG_CONTENT: JSON.stringify({
+      autoupdate: false,
+      instructions: [],
+      plugin: [],
+      share: "disabled",
+    }),
+  };
+}
+
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   if (!options.targetsPath || !options.outputPath || !options.configDir) {
@@ -305,18 +323,7 @@ async function main() {
             cwd: reviewPluginRoot,
             timeout: 600_000,
             maxBuffer: 20 * 1024 * 1024,
-            env: {
-              ...process.env,
-              CI: "true",
-              NO_COLOR: "1",
-              OPENCODE_CONFIG_DIR: resolve(options.configDir),
-              OPENCODE_CONFIG_CONTENT: JSON.stringify({
-                autoupdate: false,
-                instructions: [],
-                plugin: [],
-                share: "disabled",
-              }),
-            },
+            env: buildOpenCodeEnvironment(process.env, options.configDir),
           },
         );
         report.push("### Agent review", "", sanitizeAgentOutput(output), "");
@@ -335,15 +342,17 @@ async function main() {
   if (failed) process.exitCode = 1;
 }
 
-main().catch(async (error) => {
-  const options = parseArgs(process.argv.slice(2));
-  if (options.outputPath) {
-    await mkdir(dirname(options.outputPath), { recursive: true });
-    await writeFile(
-      options.outputPath,
-      `<!-- paseo-plugin-security-scan -->\n# Paseo plugin security scan\n\nScan failed closed: ${String(error.message ?? error)}\n`,
-    );
-  }
-  console.error(error);
-  process.exitCode = 1;
-});
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch(async (error) => {
+    const options = parseArgs(process.argv.slice(2));
+    if (options.outputPath) {
+      await mkdir(dirname(options.outputPath), { recursive: true });
+      await writeFile(
+        options.outputPath,
+        `<!-- paseo-plugin-security-scan -->\n# Paseo plugin security scan\n\nScan failed closed: ${String(error.message ?? error)}\n`,
+      );
+    }
+    console.error(error);
+    process.exitCode = 1;
+  });
+}
