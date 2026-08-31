@@ -37,7 +37,7 @@ test("retries transient Gemini demand and quota failures", () => {
 });
 
 test("honors provider retry delays with a small safety margin", () => {
-  assert.equal(retryDelayMs(new Error("Please retry in 45.7s")), 51_000);
-  assert.equal(retryDelayMs(new Error("Temporary high demand")), 60_000);
-  assert.equal(retryDelayMs(new Error("Please retry in 600s")), 120_000);
+  assert.equal(retryDelayMs(new Error("Please retry in 45.7s")), 70_000);
+  assert.equal(retryDelayMs(new Error("Temporary high demand")), 70_000);
+  assert.equal(retryDelayMs(new Error("Please retry in 600s")), 130_000);
 });

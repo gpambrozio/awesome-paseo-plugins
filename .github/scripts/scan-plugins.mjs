@@ -61,7 +61,9 @@ export function isTransientModelError(error) {
 
 export function retryDelayMs(error) {
   const match = String(error).match(/retry in\s+([0-9.]+)s/i);
-  return match ? Math.min(Math.ceil(Number(match[1]) + 5), 120) * 1_000 : 60_000;
+  return match
+    ? Math.min(Math.max(Math.ceil(Number(match[1]) + 10), 70), 130) * 1_000
+    : 70_000;
 }
 
 function sleep(milliseconds) {
@@ -69,11 +71,11 @@ function sleep(milliseconds) {
 }
 
 async function runModelWithRetry(command, args, options) {
-  for (let attempt = 1; attempt <= 2; attempt += 1) {
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
     try {
       return run(command, args, options);
     } catch (error) {
-      if (attempt === 2 || !isTransientModelError(error)) throw error;
+      if (attempt === 3 || !isTransientModelError(error)) throw error;
       const delay = retryDelayMs(error);
       console.error(`Transient Gemini error; retrying in ${delay / 1_000}s`);
       await sleep(delay);
@@ -359,7 +361,7 @@ async function main() {
         report.push(`Scan failed closed: ${String(error.message ?? error)}`, "");
         console.error(`[${target.repository}:${target.path}] ${String(error.message ?? error)}`);
       }
-      if (!options.dryRun && targetIndex < targets.length - 1) await sleep(60_000);
+      if (!options.dryRun && targetIndex < targets.length - 1) await sleep(70_000);
     }
   } finally {
     await rm(temporaryRoot, { recursive: true, force: true });
