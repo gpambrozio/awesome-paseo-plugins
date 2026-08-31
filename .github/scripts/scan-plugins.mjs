@@ -323,6 +323,7 @@ async function main() {
       } catch (error) {
         failed = true;
         report.push(`Scan failed closed: ${String(error.message ?? error)}`, "");
+        console.error(`[${target.repository}:${target.path}] ${String(error.message ?? error)}`);
       }
     }
   } finally {
