@@ -1,0 +1,83 @@
+name: Plugin security scan
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/plugin-security.yml"
+      - ".github/scripts/plugin-*.mjs"
+      - ".opencode/agents/plugin-security.md"
+      - "package.json"
+      - "package-lock.json"
+  pull_request_target: # zizmor: ignore[dangerous-triggers] The base SHA is checked out and PR content is only parsed as data.
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "README.md"
+  schedule:
+    - cron: "43 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: plugin-security-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Check out trusted scanner
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.base.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      - name: Test scanner scripts
+        run: npm test
+
+      - name: Select plugin targets
+        id: targets
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >-
+          node .github/scripts/plugin-targets.mjs
+          --event "$GITHUB_EVENT_PATH"
+          --readme README.md
+          --output "$RUNNER_TEMP/plugin-targets.json"
+
+      - name: Install pinned dependencies
+        if: steps.targets.outputs.count != '0'
+        run: npm ci
+
+      - name: Scan plugins with Gemini
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SCAN_MODEL: ${{ vars.SCAN_MODEL || 'google/gemini-3.7-flash' }}
+        run: >-
+          node .github/scripts/scan-plugins.mjs
+          --targets "$RUNNER_TEMP/plugin-targets.json"
+          --output "$RUNNER_TEMP/plugin-security-report.md"
+          --config-dir "$GITHUB_WORKSPACE/.opencode"
+          --opencode "$GITHUB_WORKSPACE/node_modules/.bin/opencode"
+          --model "$SCAN_MODEL"
+
+      - name: Publish scan report
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >-
+          node .github/scripts/publish-scan.mjs
+          "$RUNNER_TEMP/plugin-security-report.md"
+          "$GITHUB_EVENT_PATH"
