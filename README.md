@@ -26,7 +26,7 @@ Paseo plugins add native workspace panels, composer pills, Command Center items,
 
 *Plugins that add panels to workspace tabs or the explorer.*
 
-<!-- Add workspace panel plugins here. -->
+- [skills](https://github.com/gpambrozio/paseo-plugins/tree/main/skills) - Lists the skills and commands an agent session can run, shows where each one comes from, renders its `SKILL.md`, and invokes it on the live session. Claude and Codex sessions get their skill files read off the daemon's filesystem; every other provider shows what the running session reports. Install with `paseo plugin add gpambrozio/paseo-plugins --path skills`.
 
 ## Themes
 
