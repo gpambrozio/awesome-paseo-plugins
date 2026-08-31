@@ -57,7 +57,9 @@ function run(command, args, options = {}) {
   return result.stdout.trim();
 }
 export function isTransientModelError(error) {
-  return /(?:high demand|quota exceeded|exceeded your current quota|429|retry in)/i.test(String(error));
+  return /(?:high demand|quota exceeded|exceeded your current quota|429|retry in|ETIMEDOUT|timed out)/i.test(
+    String(error),
+  );
 }
 
 export function retryDelayMs(error) {

@@ -34,6 +34,7 @@ test("does not overwrite an explicitly configured Google API key", () => {
 test("retries transient Gemini demand and quota failures", () => {
   assert.equal(isTransientModelError(new Error("This model is currently experiencing high demand")), true);
   assert.equal(isTransientModelError(new Error("Quota exceeded; please retry in 45.7s")), true);
+  assert.equal(isTransientModelError(new Error("spawnSync opencode ETIMEDOUT")), true);
   assert.equal(isTransientModelError(new Error("Invalid API key")), false);
 });
 
