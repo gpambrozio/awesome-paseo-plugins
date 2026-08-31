@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   buildOpenCodeEnvironment,
+  buildOpenCodeArgs,
   isTransientModelError,
   retryDelayMs,
 } from "./scan-plugins.mjs";
@@ -40,4 +41,26 @@ test("honors provider retry delays with a small safety margin", () => {
   assert.equal(retryDelayMs(new Error("Please retry in 45.7s")), 70_000);
   assert.equal(retryDelayMs(new Error("Temporary high demand")), 70_000);
   assert.equal(retryDelayMs(new Error("Please retry in 600s")), 130_000);
+});
+
+test("passes the source bundle as one file option", () => {
+  assert.deepEqual(
+    buildOpenCodeArgs({
+      bundlePath: "/review/source.txt",
+      model: "google/gemini-3.7-flash",
+      prompt: "Review this source",
+      reviewPluginRoot: "/review/plugin",
+    }),
+    [
+      "run",
+      "--agent",
+      "plugin-security",
+      "--model",
+      "google/gemini-3.7-flash",
+      "--dir",
+      "/review/plugin",
+      "--file=/review/source.txt",
+      "Review this source",
+    ],
+  );
 });

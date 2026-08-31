@@ -250,6 +250,20 @@ Focus on behavior that matters because Paseo plugins run as trusted local code: 
 Report only evidence-backed findings. For each finding include severity, confidence, exact path and line, attacker-controlled input if applicable, reachable sink, impact, and remediation. Separate confirmed vulnerabilities from defense-in-depth concerns. If no material issue is found, say so and describe the files and trust boundaries reviewed. Do not include raw secrets or credentials in the report.`;
 }
 
+export function buildOpenCodeArgs({ bundlePath, model, prompt, reviewPluginRoot }) {
+  return [
+    "run",
+    "--agent",
+    "plugin-security",
+    "--model",
+    model,
+    "--dir",
+    reviewPluginRoot,
+    `--file=${bundlePath}`,
+    prompt,
+  ];
+}
+
 async function cloneRepository(target, destination) {
   const args = ["-c", "core.hooksPath=/dev/null", "clone", "--depth=1", "--filter=blob:none", "--no-tags", "--single-branch"];
   if (target.ref) args.push("--branch", target.ref);
@@ -364,18 +378,12 @@ async function main() {
 
         const output = await runModelWithRetry(
           options.opencodePath,
-          [
-            "run",
-            "--agent",
-            "plugin-security",
-            "--model",
-            options.model,
-            "--dir",
-            reviewPluginRoot,
-            "--file",
+          buildOpenCodeArgs({
             bundlePath,
-            scanPrompt(target, commit, coverage),
-          ],
+            model: options.model,
+            prompt: scanPrompt(target, commit, coverage),
+            reviewPluginRoot,
+          }),
           {
             cwd: reviewPluginRoot,
             timeout: 180_000,
