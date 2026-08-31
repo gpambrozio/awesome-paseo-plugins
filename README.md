@@ -28,6 +28,7 @@ Paseo plugins add native workspace panels, composer pills, Command Center items,
 
 *Plugins that add panels to workspace tabs or the explorer.*
 
+- [pi-tasks-timeline](https://github.com/mcowger/paseo-plugins/tree/main/pi-tasks-timeline) - Keeps Pi task lists visible in Paseo timelines and workspace or explorer panels, with a composer pill for active tasks.
 - [skills](https://github.com/gpambrozio/paseo-plugins/tree/main/skills) - Lists the skills and commands an agent session can run, shows where each one comes from, renders its `SKILL.md`, and invokes it on the live session. Claude and Codex sessions get their skill files read off the daemon's filesystem; every other provider shows what the running session reports. Install with `paseo plugin add gpambrozio/paseo-plugins --path skills`.
 
 ## Themes
