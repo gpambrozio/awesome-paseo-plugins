@@ -48,7 +48,7 @@ test("passes the source bundle as one file option", () => {
   assert.deepEqual(
     buildOpenCodeArgs({
       bundlePath: "/review/source.txt",
-      model: "google/gemini-3.5-flash",
+      model: "google/gemini-2.5-flash",
       prompt: "Review this source",
       reviewPluginRoot: "/review/plugin",
     }),
@@ -57,7 +57,7 @@ test("passes the source bundle as one file option", () => {
       "--agent",
       "plugin-security",
       "--model",
-      "google/gemini-3.5-flash",
+      "google/gemini-2.5-flash",
       "--dir",
       "/review/plugin",
       "Review this source",
