@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   buildOpenCodeEnvironment,
   buildOpenCodeArgs,
+  hasModelCredential,
   isTransientModelError,
   retryDelayMs,
 } from "./scan-plugins.mjs";
@@ -29,6 +30,13 @@ test("does not overwrite an explicitly configured Google API key", () => {
   );
 
   assert.equal(environment.GOOGLE_GENERATIVE_AI_API_KEY, "explicit");
+});
+
+test("requires the credential matching the selected provider", () => {
+  assert.equal(hasModelCredential("google/gemini-3.1-flash-lite", { GEMINI_API_KEY: "key" }), true);
+  assert.equal(hasModelCredential("google/gemini-3.1-flash-lite", {}), false);
+  assert.equal(hasModelCredential("opencode/big-pickle", { OPENCODE_API_KEY: "key" }), true);
+  assert.equal(hasModelCredential("opencode/big-pickle", {}), false);
 });
 
 test("retries transient Gemini demand and quota failures", () => {

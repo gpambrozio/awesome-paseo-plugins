@@ -6,6 +6,8 @@ on:
     paths:
       - ".github/workflows/plugin-security.yml"
       - ".github/scripts/plugin-*.mjs"
+      - ".github/scripts/static-scan*.mjs"
+      - ".github/security/**"
       - ".opencode/agents/plugin-security.md"
       - "package.json"
       - "package-lock.json"
@@ -61,15 +63,33 @@ jobs:
         if: steps.targets.outputs.count != '0'
         run: npm ci
 
-      - name: Scan plugins with Gemini
+      - name: Install pinned security tools
+        if: steps.targets.outputs.count != '0'
+        env:
+          GOBIN: ${{ runner.temp }}/security-bin
+        run: |
+          pipx install semgrep==1.175.0
+          pipx install zizmor==1.30.0
+          go install github.com/zricethezav/gitleaks/v8@v8.30.1
+          go install github.com/google/osv-scanner/v2/cmd/osv-scanner@v2.5.1
+          go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
+
+      - name: Review plugins with selected model
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
           SCAN_MODEL: ${{ vars.SCAN_MODEL || 'google/gemini-3.1-flash-lite' }}
         run: >-
           node .github/scripts/scan-plugins.mjs
           --targets "$RUNNER_TEMP/plugin-targets.json"
           --output "$RUNNER_TEMP/plugin-security-report.md"
           --config-dir "$GITHUB_WORKSPACE/.opencode"
+          --security-config-dir "$GITHUB_WORKSPACE/.github/security"
+          --actionlint "$RUNNER_TEMP/security-bin/actionlint"
+          --gitleaks "$RUNNER_TEMP/security-bin/gitleaks"
+          --osv-scanner "$RUNNER_TEMP/security-bin/osv-scanner"
+          --semgrep "$HOME/.local/bin/semgrep"
+          --zizmor "$HOME/.local/bin/zizmor"
           --opencode "$GITHUB_WORKSPACE/node_modules/.bin/opencode"
           --model "$SCAN_MODEL"
 

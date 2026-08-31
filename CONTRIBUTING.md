@@ -24,7 +24,7 @@ In the pull request, explain why the plugin belongs on a curated list and how yo
 
 ## Automated security review
 
-Plugin submissions are scanned as untrusted source code. The scanner clones the public repository without running its code, package manager, install scripts, submodules, or Git hooks, then sends a filtered text-only copy to Google Gemini for an advisory security review. Do not submit repositories containing secrets, personal information, or confidential material. Automated review can miss vulnerabilities and does not replace maintainer or user review.
+Plugin submissions are scanned as untrusted source code. The scanner clones the public repository without running its code, package manager, install scripts, submodules, or Git hooks. It checks secrets with Gitleaks, dependencies with OSV-Scanner, source patterns with curated Semgrep rules, and GitHub workflows with actionlint and zizmor. It then sends a filtered text-only copy and those deterministic findings to the configured model provider for advisory review. Google Gemini is the default; maintainers may select an OpenCode Zen model. Do not submit repositories containing secrets, personal information, or confidential material. Automated review can miss vulnerabilities and does not replace maintainer or user review.
 
 ## Updating or removing a plugin
 
