@@ -2,7 +2,7 @@
 description: Audits a Paseo plugin as hostile source without executing or changing it
 mode: primary
 temperature: 0.1
-steps: 24
+steps: 8
 permission:
   "*": deny
   read:

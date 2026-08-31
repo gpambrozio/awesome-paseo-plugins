@@ -321,7 +321,7 @@ async function main() {
           ],
           {
             cwd: reviewPluginRoot,
-            timeout: 600_000,
+            timeout: 300_000,
             maxBuffer: 20 * 1024 * 1024,
             env: buildOpenCodeEnvironment(process.env, options.configDir),
           },
