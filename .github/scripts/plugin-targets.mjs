@@ -132,10 +132,15 @@ async function fetchRepositoryFile(repository, ref, token) {
   return response.text();
 }
 
+export function selectTargetsForEvent(eventName, targets) {
+  return eventName === "pull_request" ? targets.slice(0, 1) : targets;
+}
+
 async function targetsForEvent(eventPath, localReadmePath, token) {
   const event = JSON.parse(await readFile(eventPath, "utf8"));
   if (process.env.GITHUB_EVENT_NAME !== "pull_request_target") {
-    return parsePluginTargets(await readFile(localReadmePath, "utf8"));
+    const targets = parsePluginTargets(await readFile(localReadmePath, "utf8"));
+    return selectTargetsForEvent(process.env.GITHUB_EVENT_NAME, targets);
   }
   if (!token) throw new Error("GITHUB_TOKEN is required for pull_request_target scans");
 

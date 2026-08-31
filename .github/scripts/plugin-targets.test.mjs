@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { parsePluginTargets, selectChangedTargets } from "./plugin-targets.mjs";
+import {
+  parsePluginTargets,
+  selectChangedTargets,
+  selectTargetsForEvent,
+} from "./plugin-targets.mjs";
 
 const DOCUMENT = `# Plugins
 
@@ -68,4 +72,11 @@ test("rejects duplicate plugin targets", () => {
 test("rejects plugin names that can inject report markup", () => {
   const markdown = DOCUMENT.replace("[root]", "[<img-src=x>]");
   assert.throws(() => parsePluginTargets(markdown), /Plugin name must contain only/);
+});
+
+test("pull_request smoke tests one plugin while scheduled runs scan all", () => {
+  const targets = parsePluginTargets(DOCUMENT);
+  assert.deepEqual(selectTargetsForEvent("pull_request", targets), [targets[0]]);
+  assert.deepEqual(selectTargetsForEvent("schedule", targets), targets);
+  assert.deepEqual(selectTargetsForEvent("workflow_dispatch", targets), targets);
 });
