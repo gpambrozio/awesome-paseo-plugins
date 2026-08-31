@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { buildOpenCodeEnvironment } from "./scan-plugins.mjs";
+import {
+  buildOpenCodeEnvironment,
+  isTransientModelError,
+  retryDelayMs,
+} from "./scan-plugins.mjs";
 
 test("maps GEMINI_API_KEY to the environment expected by OpenCode", () => {
   const environment = buildOpenCodeEnvironment({ GEMINI_API_KEY: "test-key" }, "/trusted/config");
@@ -24,4 +28,16 @@ test("does not overwrite an explicitly configured Google API key", () => {
   );
 
   assert.equal(environment.GOOGLE_GENERATIVE_AI_API_KEY, "explicit");
+});
+
+test("retries transient Gemini demand and quota failures", () => {
+  assert.equal(isTransientModelError(new Error("This model is currently experiencing high demand")), true);
+  assert.equal(isTransientModelError(new Error("Quota exceeded; please retry in 45.7s")), true);
+  assert.equal(isTransientModelError(new Error("Invalid API key")), false);
+});
+
+test("honors provider retry delays with a small safety margin", () => {
+  assert.equal(retryDelayMs(new Error("Please retry in 45.7s")), 51_000);
+  assert.equal(retryDelayMs(new Error("Temporary high demand")), 60_000);
+  assert.equal(retryDelayMs(new Error("Please retry in 600s")), 120_000);
 });

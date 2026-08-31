@@ -55,6 +55,33 @@ function run(command, args, options = {}) {
   }
   return result.stdout.trim();
 }
+export function isTransientModelError(error) {
+  return /(?:high demand|quota exceeded|exceeded your current quota|429|retry in)/i.test(String(error));
+}
+
+export function retryDelayMs(error) {
+  const match = String(error).match(/retry in\s+([0-9.]+)s/i);
+  return match ? Math.min(Math.ceil(Number(match[1]) + 5), 120) * 1_000 : 60_000;
+}
+
+function sleep(milliseconds) {
+  return new Promise((resolvePromise) => setTimeout(resolvePromise, milliseconds));
+}
+
+async function runModelWithRetry(command, args, options) {
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    try {
+      return run(command, args, options);
+    } catch (error) {
+      if (attempt === 2 || !isTransientModelError(error)) throw error;
+      const delay = retryDelayMs(error);
+      console.error(`Transient Gemini error; retrying in ${delay / 1_000}s`);
+      await sleep(delay);
+    }
+  }
+  throw new Error("Gemini retry loop ended unexpectedly");
+}
+
 
 function validateTarget(target) {
   if (!target || typeof target !== "object") throw new Error("Invalid plugin target");
@@ -259,7 +286,7 @@ async function main() {
   let failed = false;
 
   try {
-    for (const target of targets) {
+    for (const [targetIndex, target] of targets.entries()) {
       report.push(`## ${target.name}`, "", `Source: ${target.url}`, "");
       try {
         const repositoryKey = `${target.repository}@${target.ref ?? "default"}`;
@@ -286,7 +313,7 @@ async function main() {
           cwd: repositoryRoot,
           env: withoutSecrets(process.env),
         });
-        const reviewRoot = join(temporaryRoot, "reviews", `${targets.indexOf(target)}`);
+        const reviewRoot = join(temporaryRoot, "reviews", `${targetIndex}`);
         await mkdir(reviewRoot, { recursive: true });
         const coverage = await createReviewCopy(repositoryRoot, reviewRoot);
         const reviewPluginRoot = resolve(reviewRoot, target.path);
@@ -307,7 +334,7 @@ async function main() {
         }
         if (!process.env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
 
-        const output = run(
+        const output = await runModelWithRetry(
           options.opencodePath,
           [
             "run",
@@ -321,7 +348,7 @@ async function main() {
           ],
           {
             cwd: reviewPluginRoot,
-            timeout: 300_000,
+            timeout: 180_000,
             maxBuffer: 20 * 1024 * 1024,
             env: buildOpenCodeEnvironment(process.env, options.configDir),
           },
@@ -332,6 +359,7 @@ async function main() {
         report.push(`Scan failed closed: ${String(error.message ?? error)}`, "");
         console.error(`[${target.repository}:${target.path}] ${String(error.message ?? error)}`);
       }
+      if (!options.dryRun && targetIndex < targets.length - 1) await sleep(60_000);
     }
   } finally {
     await rm(temporaryRoot, { recursive: true, force: true });
