@@ -59,8 +59,9 @@ test("passes the source bundle as one file option", () => {
       "google/gemini-3.7-flash",
       "--dir",
       "/review/plugin",
-      "--file=/review/source.txt",
       "Review this source",
+      "--file",
+      "/review/source.txt",
     ],
   );
 });

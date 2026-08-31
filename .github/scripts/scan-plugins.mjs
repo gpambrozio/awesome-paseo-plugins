@@ -259,8 +259,9 @@ export function buildOpenCodeArgs({ bundlePath, model, prompt, reviewPluginRoot 
     model,
     "--dir",
     reviewPluginRoot,
-    `--file=${bundlePath}`,
     prompt,
+    "--file",
+    bundlePath,
   ];
 }
 
