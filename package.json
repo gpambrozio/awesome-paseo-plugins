@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test .github/scripts/plugin-targets.test.mjs",
+    "test": "node --test .github/scripts/*.test.mjs",
     "check:scripts": "node --check .github/scripts/plugin-targets.mjs && node --check .github/scripts/scan-plugins.mjs && node --check .github/scripts/publish-scan.mjs"
   },
   "devDependencies": {

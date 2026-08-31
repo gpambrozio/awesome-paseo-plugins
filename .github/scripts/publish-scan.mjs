@@ -2,6 +2,8 @@
 
 import { appendFile, readFile } from "node:fs/promises";
 import process from "node:process";
+import { pathToFileURL } from "node:url";
+
 
 const MARKER = "<!-- paseo-plugin-security-scan -->";
 const MAX_COMMENT_BYTES = 60_000;
@@ -28,6 +30,10 @@ function boundedComment(report) {
   while (Buffer.byteLength(truncated) > MAX_COMMENT_BYTES) truncated = truncated.slice(0, -1_000);
   return `${truncated.trim()}\n\n[Report truncated; see the workflow job summary for complete output.]\n`;
 }
+export function shouldPublishPullRequestComment(event, repository, eventName) {
+  return Boolean(repository && event.pull_request?.number && eventName === "pull_request_target");
+}
+
 
 async function publishPullRequestComment(event, report) {
   if (!process.env.GITHUB_TOKEN) {
@@ -35,15 +41,11 @@ async function publishPullRequestComment(event, report) {
     return;
   }
   const repository = process.env.GITHUB_REPOSITORY;
-  const pullNumber = event.pull_request?.number;
-  if (!repository || !pullNumber) return;
-  if (
-    process.env.GITHUB_EVENT_NAME === "pull_request" &&
-    event.pull_request?.head?.repo?.full_name !== repository
-  ) {
-    console.log("Fork pull request has a read-only token; skipping pull request comment");
+  if (!shouldPublishPullRequestComment(event, repository, process.env.GITHUB_EVENT_NAME)) {
+    console.log("Only pull_request_target runs publish comments; report is available in the job summary");
     return;
   }
+  const pullNumber = event.pull_request.number;
 
   const comments = await githubRequest(`/repos/${repository}/issues/${pullNumber}/comments?per_page=100`);
   const previous = comments.find((comment) => comment.user?.type === "Bot" && comment.body?.includes(MARKER));
@@ -76,7 +78,9 @@ async function main() {
   if (event.pull_request) await publishPullRequestComment(event, report);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}
