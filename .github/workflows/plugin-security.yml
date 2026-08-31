@@ -64,7 +64,7 @@ jobs:
       - name: Scan plugins with Gemini
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          SCAN_MODEL: ${{ vars.SCAN_MODEL || 'google/gemini-2.5-flash' }}
+          SCAN_MODEL: ${{ vars.SCAN_MODEL || 'google/gemini-3.6-flash' }}
         run: >-
           node .github/scripts/scan-plugins.mjs
           --targets "$RUNNER_TEMP/plugin-targets.json"
